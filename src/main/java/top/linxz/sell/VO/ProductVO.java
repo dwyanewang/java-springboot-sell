@@ -12,7 +12,7 @@ public class ProductVO {
     private String categoryName;
 
     @JsonProperty("type")
-    private Integer cateogryType;
+    private Integer categoryType;
 
     @JsonProperty("foods")
     private List<ProductInfoVO> productInfoVOList;
