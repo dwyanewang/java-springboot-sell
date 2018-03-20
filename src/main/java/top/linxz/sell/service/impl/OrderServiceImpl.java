@@ -3,8 +3,11 @@ package top.linxz.sell.service.impl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import top.linxz.sell.converter.OrderMaster2OrderDTOConverter;
 import top.linxz.sell.dataobject.OrderDetail;
 import top.linxz.sell.dataobject.OrderMaster;
 import top.linxz.sell.dataobject.ProductInfo;
@@ -59,8 +62,8 @@ public class OrderServiceImpl implements OrderService {
 
             //订单详情入库
             BeanUtils.copyProperties(productInfo, orderDetail); //
-            orderDetail.setOrderId(KeyUtil.genUniqueKey());
-            orderDetail.setDetailId(orderId);
+            orderDetail.setOrderId(orderId);
+            orderDetail.setDetailId(KeyUtil.genUniqueKey());
 
             orderDetailRepository.save(orderDetail);
         }
@@ -86,12 +89,34 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDTO findOne(String orderId) {
-        return null;
+        OrderMaster orderMaster = orderMasterRepository.findOne(orderId);
+        if (orderMaster == null) {
+            throw new SellException(ResultEnum.ORDER_NOT_EXIST);
+        }
+
+        List<OrderDetail> orderDetailList = orderDetailRepository.findByOrderId(orderId);
+        if (CollectionUtils.isEmpty(orderDetailList)) {
+            throw new SellException(ResultEnum.ORDERDETAIL_NOT_EXIST);
+        }
+
+        OrderDTO orderDTO = new OrderDTO();
+        BeanUtils.copyProperties(orderMaster, orderDTO);
+        orderDTO.setOrderDetailList(orderDetailList);
+
+        return orderDTO;
     }
 
     @Override
     public Page<OrderDTO> findList(String buyerOpenid, Pageable pageable) {
-        return null;
+        Page<OrderMaster> orderMasterPage = orderMasterRepository.findByBuyerOpenid(buyerOpenid, pageable);
+
+        List<OrderDTO> orderDTOList = OrderMaster2OrderDTOConverter.convert(orderMasterPage.getContent());
+
+        orderMasterPage.getContent();
+
+        Page<OrderDTO> orderDTOPage = new PageImpl<>(orderDTOList, pageable, orderMasterPage.getTotalElements());
+
+        return orderDTOPage;
     }
 
     @Override
