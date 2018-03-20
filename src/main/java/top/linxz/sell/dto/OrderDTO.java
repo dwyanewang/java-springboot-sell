@@ -1,23 +1,16 @@
-package top.linxz.sell.dataobject;
+package top.linxz.sell.dto;
 
 import lombok.Data;
-import org.hibernate.annotations.DynamicUpdate;
+import top.linxz.sell.dataobject.OrderDetail;
 import top.linxz.sell.enums.OrderStatusEnum;
 import top.linxz.sell.enums.PayStatusEnum;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
-@Entity
 @Data
-@DynamicUpdate
-public class OrderMaster {
-
-    @Id
+public class OrderDTO {
     private String orderId;
     private String buyerName;
     private String buyerPhone;
@@ -27,12 +20,13 @@ public class OrderMaster {
     //总金额
     private BigDecimal orderAmount;
 
-    private Integer orderStatus = OrderStatusEnum.NEW.getCode();
+    private Integer orderStatus;
 
-    private Integer payStatus = PayStatusEnum.WAIT.getCode();
+    private Integer payStatus;
 
     private Date createTime;
 
     private Date updateTime;
 
+    List<OrderDetail> orderDetailList;
 }
