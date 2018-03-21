@@ -115,8 +115,6 @@ public class OrderServiceImpl implements OrderService {
 
         List<OrderDTO> orderDTOList = OrderMaster2OrderDTOConverter.convert(orderMasterPage.getContent());
 
-        orderMasterPage.getContent();
-
         Page<OrderDTO> orderDTOPage = new PageImpl<>(orderDTOList, pageable, orderMasterPage.getTotalElements());
 
         return orderDTOPage;
@@ -145,7 +143,7 @@ public class OrderServiceImpl implements OrderService {
         // 返还库存
         if (CollectionUtils.isEmpty(orderDTO.getOrderDetailList())) {
             log.error("【取消订单】订单中无商品详情，orderDTO={}", orderDTO);
-            throw new SellException(ResultEnum.ORDER_UPDATE_FAIL);
+            throw new SellException(ResultEnum.ORDERDETAIL_NOT_EXIST);
         }
         List<CartDTO> cartDTOList = orderDTO.getOrderDetailList().stream()
                 .map(e -> new CartDTO(e.getProductId(), e.getProductQuantity()))
