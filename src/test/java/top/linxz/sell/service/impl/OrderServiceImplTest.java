@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 import top.linxz.sell.dataobject.OrderDetail;
 import top.linxz.sell.dto.OrderDTO;
+import top.linxz.sell.enums.OrderStatusEnum;
 import top.linxz.sell.repository.OrderMasterRepository;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class OrderServiceImplTest {
     private OrderServiceImpl orderService;
 
     @Test
-    public void create() {
+    public void create() throws Exception {
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setBuyerName("廖师兄");
         orderDTO.setBuyerAddress("慕课网");
@@ -57,21 +58,24 @@ public class OrderServiceImplTest {
     }
 
     @Test
-    public void findOne() {
+    public void findOne() throws Exception {
         OrderDTO result = orderService.findOne(ORDER_ID);
         log.info("【查询单个订单】result={}", result);
         Assert.assertEquals(ORDER_ID, result.getOrderId());
     }
 
     @Test
-    public void findList() {
+    public void findList() throws Exception {
         PageRequest request = new PageRequest(0, 2);
         Page<OrderDTO> orderDTOPage = orderService.findList(BUYER_OPENID, request);
         Assert.assertNotEquals(0, orderDTOPage.getTotalElements());
     }
 
     @Test
-    public void cancel() {
+    public void cancel() throws Exception {
+        OrderDTO orderDTO = orderService.findOne(ORDER_ID);
+        OrderDTO result = orderService.cancel(orderDTO);
+        Assert.assertEquals(OrderStatusEnum.CANCEL.getCode(), result.getOrderStatus());
     }
 
     @Test

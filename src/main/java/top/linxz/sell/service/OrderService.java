@@ -12,21 +12,21 @@ import java.util.List;
 public interface OrderService {
 
     //创建订单
-    OrderDTO create(OrderDTO orderDTO);
+    OrderDTO create(OrderDTO orderDTO)throws Exception;
 
     //查询单个订单
-    OrderDTO findOne(String orderId);
+    OrderDTO findOne(String orderId)throws Exception;
 
     //查询订单列表
-    Page<OrderDTO> findList(String buyerOpenid, Pageable pageable);
+    Page<OrderDTO> findList(String buyerOpenid, Pageable pageable)throws Exception;
 
     //取消订单
-    OrderDTO cancel(OrderDTO orderDTO);
+    OrderDTO cancel(OrderDTO orderDTO)throws Exception;
 
     //完结订单
-    OrderDTO finish(OrderDTO orderDTO);
+    OrderDTO finish(OrderDTO orderDTO)throws Exception;
 
     //支付订单
-    OrderDTO paid(OrderDTO orderDTO);
+    OrderDTO paid(OrderDTO orderDTO)throws Exception;
 
 }

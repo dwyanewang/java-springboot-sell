@@ -1,5 +1,6 @@
 package top.linxz.sell.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,10 +28,12 @@ import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
@@ -44,7 +47,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderDTO create(OrderDTO orderDTO) {
+    public OrderDTO create(OrderDTO orderDTO) throws Exception {
 
         String orderId = KeyUtil.genUniqueKey();
 
@@ -88,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO findOne(String orderId) {
+    public OrderDTO findOne(String orderId) throws Exception {
         OrderMaster orderMaster = orderMasterRepository.findOne(orderId);
         if (orderMaster == null) {
             throw new SellException(ResultEnum.ORDER_NOT_EXIST);
@@ -107,7 +110,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<OrderDTO> findList(String buyerOpenid, Pageable pageable) {
+    public Page<OrderDTO> findList(String buyerOpenid, Pageable pageable) throws Exception {
         Page<OrderMaster> orderMasterPage = orderMasterRepository.findByBuyerOpenid(buyerOpenid, pageable);
 
         List<OrderDTO> orderDTOList = OrderMaster2OrderDTOConverter.convert(orderMasterPage.getContent());
@@ -120,17 +123,50 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO cancel(OrderDTO orderDTO) {
+    @Transactional
+    public OrderDTO cancel(OrderDTO orderDTO) throws Exception {
+        OrderMaster orderMaster = new OrderMaster();
+
+        // 判断订单状态
+        if (!orderDTO.getOrderStatus().equals(OrderStatusEnum.NEW.getCode())) {
+            log.error("【取消订单】状态状态不正确，orderId={},orderStatus={}", orderDTO.getOrderId(), orderDTO.getOrderStatus());
+            throw new SellException(ResultEnum.ORDER_STATUS_ERROR);
+        }
+
+        // 修改状态
+        orderDTO.setOrderStatus(OrderStatusEnum.CANCEL.getCode());
+        BeanUtils.copyProperties(orderDTO, orderMaster);
+        OrderMaster result = orderMasterRepository.save(orderMaster);
+        if (result == null) {
+            log.error("【取消订单】更新失败，orderMaster={}", result);
+            throw new SellException(ResultEnum.ORDER_UPDATE_FAIL);
+        }
+
+        // 返还库存
+        if (CollectionUtils.isEmpty(orderDTO.getOrderDetailList())) {
+            log.error("【取消订单】订单中无商品详情，orderDTO={}", orderDTO);
+            throw new SellException(ResultEnum.ORDER_UPDATE_FAIL);
+        }
+        List<CartDTO> cartDTOList = orderDTO.getOrderDetailList().stream()
+                .map(e -> new CartDTO(e.getProductId(), e.getProductQuantity()))
+                .collect(Collectors.toList());
+        productService.increaseStock(cartDTOList);
+
+        // 如果已支付则退款
+        if (orderDTO.getOrderStatus().equals(PayStatusEnum.SUCCESS.getCode())) {
+            //TODO
+        }
+
+        return orderDTO;
+    }
+
+    @Override
+    public OrderDTO finish(OrderDTO orderDTO) throws Exception {
         return null;
     }
 
     @Override
-    public OrderDTO finish(OrderDTO orderDTO) {
-        return null;
-    }
-
-    @Override
-    public OrderDTO paid(OrderDTO orderDTO) {
+    public OrderDTO paid(OrderDTO orderDTO) throws Exception {
         return null;
     }
 }
