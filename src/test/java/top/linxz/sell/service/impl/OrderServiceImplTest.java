@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import top.linxz.sell.dataobject.OrderDetail;
 import top.linxz.sell.dto.OrderDTO;
 import top.linxz.sell.enums.OrderStatusEnum;
+import top.linxz.sell.enums.PayStatusEnum;
 import top.linxz.sell.repository.OrderMasterRepository;
 
 import java.util.ArrayList;
@@ -79,10 +80,16 @@ public class OrderServiceImplTest {
     }
 
     @Test
-    public void finish() {
+    public void finish() throws Exception {
+        OrderDTO orderDTO = orderService.findOne(ORDER_ID);
+        OrderDTO result = orderService.finish(orderDTO);
+        Assert.assertEquals(OrderStatusEnum.FINISHED.getCode(), result.getOrderStatus());
     }
 
     @Test
-    public void paid() {
+    public void paid() throws Exception {
+        OrderDTO orderDTO = orderService.findOne(ORDER_ID);
+        OrderDTO result = orderService.paid(orderDTO);
+        Assert.assertEquals(PayStatusEnum.SUCCESS.getCode(), result.getOrderStatus());
     }
 }
