@@ -14,6 +14,7 @@ import top.linxz.sell.dto.OrderDTO;
 import top.linxz.sell.enums.ResultEnum;
 import top.linxz.sell.exception.SellException;
 import top.linxz.sell.form.OrderForm;
+import top.linxz.sell.service.BuyerService;
 import top.linxz.sell.service.OrderService;
 import top.linxz.sell.utils.ResultVOUtil;
 
@@ -28,6 +29,8 @@ import java.util.Map;
 public class BuyerOrderController {
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private BuyerService buyerService;
 
     @PostMapping("/create")
     public ResultVO<Map<String, String>> create(@Valid OrderForm orderForm, BindingResult bindingResult) {
@@ -68,7 +71,7 @@ public class BuyerOrderController {
     public ResultVO<OrderDTO> detail(@RequestParam("openid") String openid,
                                      @RequestParam("orderId") String orderId) {
         //TODO 不安全的做法，改进
-        OrderDTO orderDTO = orderService.findOne(orderId);
+        OrderDTO orderDTO = buyerService.findOrderOne(openid, orderId);
         return ResultVOUtil.success(orderDTO);
     }
 
@@ -76,8 +79,7 @@ public class BuyerOrderController {
     public ResultVO cancel(@RequestParam("openid") String openid,
                            @RequestParam("orderId") String orderId) {
         //TODO 不安全的做法，改进
-        OrderDTO orderDTO = orderService.findOne(orderId);
-        orderService.cancel(orderDTO);
+        OrderDTO orderDTO = buyerService.cancelOrder(openid, orderId);
 
         return ResultVOUtil.success();
     }
