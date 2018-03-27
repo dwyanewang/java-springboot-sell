@@ -13,12 +13,9 @@ import top.linxz.sell.dataobject.OrderDetail;
 import top.linxz.sell.dto.OrderDTO;
 import top.linxz.sell.enums.OrderStatusEnum;
 import top.linxz.sell.enums.PayStatusEnum;
-import top.linxz.sell.repository.OrderMasterRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -91,5 +88,12 @@ public class OrderServiceImplTest {
         OrderDTO orderDTO = orderService.findOne(ORDER_ID);
         OrderDTO result = orderService.paid(orderDTO);
         Assert.assertEquals(PayStatusEnum.SUCCESS.getCode(), result.getOrderStatus());
+    }
+
+    @Test
+    public void list() {
+        PageRequest request = new PageRequest(0, 2);
+        Page<OrderDTO> orderDTOPage = orderService.findList(request);
+        Assert.assertNotEquals(0, orderDTOPage.getTotalElements());
     }
 }
