@@ -8,3 +8,7 @@ spring:
       show-sql: true
 server:
   context-path: /sell
+
+wechat:
+  mpAppId: wx75eab88f02a2e739
+  mpAppSecret: 4c64c995ac89aae39629c5f8e9244dfd
